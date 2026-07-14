@@ -1,0 +1,5 @@
+!target/h2os-[0-9]*.[0-9]*.[0-9]*.jar
+target/
+.idea/
+esp/esp.h
+src/main/resources/application.properties
