@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@source "./*html";
+
+@theme {
+  --font-sans: "Inter Tight", sans-serif;
+}
+
+.status-success-svg {
+  filter: invert(24%) sepia(90%) saturate(2000%) hue-rotate(90deg) brightness(91%) contrast(97%);
+}
+.status-failure-svg {
+  filter: invert(24%) sepia(90%) saturate(2000%) hue-rotate(338deg) brightness(91%) contrast(97%);
+}

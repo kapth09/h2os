@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bewässerung</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+	<script src="./exports.js" defer type="module"></script>
+	<script src="./watering.js" defer type="module"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter Tight"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+	<style>
+		.status-success-svg {
+			filter: invert(24%) sepia(90%) saturate(2000%) hue-rotate(90deg) brightness(91%) contrast(97%);
+		}
+		.status-failure-svg {
+			filter: invert(24%) sepia(90%) saturate(2000%) hue-rotate(338deg) brightness(91%) contrast(97%);
+		}
+	</style>
+</head>
+<body class="w-screen h-screen flex justify-center bg-zinc-100 ">
+	<div class="flex flex-col items-center gap-3 max-w-[48rem] w-full h-full">
+		<!-- Banner -->
+		<header class="bg-white p-3 w-full h-fit flex flex-col items-center gap-5 mb-6 rounded-xl">
+			<div class="flex justify-between items-center w-full">
+				<h1 class="text-3xl font-medium">Bewässerung</h1>
+				<button id="status-save" onclick="sendScheduleChanges()" class="hidden z-20 fixed top-3 right-3 bg-sky-600 text-white text-lg p-2 rounded-xl font-medium w-1/3 shadow-md">Speicher</button>
+			</div> 
+			<!-- Connection Status -->
+			<div class="flex flex-row items-center justify-center gap-2 w-full">
+			<div class="bg-zinc-100 p-3 w-1/5 rounded-xl flex justify-center">
+					<img class="h-6 status-success-svg" src="./assets/user.svg" alt="" srcset=""> </div>
+				<img class="h-2" src="./assets/circle-dot.svg" alt="" srcset="">
+				<img class="h-2" src="./assets/circle-dot.svg" alt="" srcset="">
+				<div class="bg-zinc-100 p-3 w-1/5 rounded-xl flex justify-center">
+					<img id="status-svg-server" class="h-6" src="./assets/server.svg" alt="" srcset="">
+				</div>
+				<img class="h-2" src="./assets/circle-dot.svg" alt="" srcset="">
+				<img class="h-2" src="./assets/circle-dot.svg" alt="" srcset="">
+				<div class="bg-zinc-100 p-3 w-1/5 rounded-xl flex justify-center">
+					<img id="status-svg-microchip" class="h-6" src="./assets/microchip.svg" alt="" srcset=""> </div>
+			</div>
+		</header>
+
+		<!-- Info -->
+		<div class="bg-white p-3 w-[95%] rounded-xl flex flex-col justify-between gap-5">
+			<div class="flex flex-col w-full">
+				<div class=""> 
+					<h1 class="text-2xl font-medium">Status</h1>
+				</div>
+				<div class="h-full flex flex-col justify-center">
+					<p id="info-active-day" class=" text-xl text-zinc-500">Leer</p>
+					<!--
+					-->
+					<div id="info-time-span" class="flex flex-row gap-2 items-center">
+						<p id="info-start-time" class=" text-xl font-bold">--:--</p>
+						<p>bis</p>
+						<p id="info-end-time" class=" text-xl font-bold">--:--</p>
+					</div>
+					<div id="info-active-end-time-div" class="flex flex-row gap-2 items-center">
+						<p>Bis</p>
+						<p id="info-active-end-time" class="text-xl font-bold">--:--:--</p>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Controlls -->
+			<div class="h-full w-full bg-zinc-100 rounded-xl p-3 flex flex-col justify-around gap-1">
+				<!-- Stop 
+				-->
+				<button onclick="btnStop()" id="info-btn-stop" class="active:bg-red-600 bg-red-400 rounded-md p-2 flex flex-row items-center gap-2 h-full relative overflow-hidden">
+					<div id="info-animate-stop" class="absolute inset-0 w-3/4 h-full bg-red-500"></div>
+					<object class="h-6 z-10" data="./assets/stop.svg" type="image/svg+xml"></object>
+					<p class="text-white font-bold z-10">Stop</p>
+				</button> 
+
+				<!-- Pause 
+				-->
+				<button onclick="btnPause()" id="info-btn-pause" class="active:bg-amber-600 bg-amber-400 rounded-md p-2 flex flex-row items-center gap-2 h-full relative overflow-hidden">
+					<div id="info-animate-pause" class=" absolute inset-0 w-3/4 h-full bg-amber-500"></div>
+					<object class="h-6 z-10" data="./assets/pause.svg" type="image/svg+xml"></object>
+					<p class="text-white font-bold z-10">Pause</p>
+				</button> 
+
+				<!-- Resume 
+				-->
+				<button onclick="btnResume()" id="info-btn-resume" class="active:bg-green-600 bg-green-400 rounded-md p-2 flex flex-row items-center gap-2 h-full relative overflow-hidden">
+					<div id="info-animate-resume" class="absolute inset-0 w-3/4 h-full bg-green-500"></div>
+					<object class="h-6 z-10" data="./assets/play-pause.svg" type="image/svg+xml"></object>
+					<p class="text-white font-bold z-10">Fortsetzen</p>
+				</button>
+
+				<!-- Inactive 
+				-->
+				<p id="info-inactive" class="text-lg font-medium self-center">Inaktiv</p>
+			</div>
+		</div>
+
+
+		<!-- Start Now -->
+		<div class="flex flex-col w-[95%] gap-1 p-3 rounded-xl">
+			<p class="text-2xl font-medium">Jetzt</p> 
+			<hr>
+			<div class="w-full bg-white flex flex-row gap-2 p-2 rounded-xl justify-around">
+				<!-- Minute Input -->
+				<div class="flex flex-row items-center bg-white border-2 border-solid border-zinc-200 rounded-xl overflow-hidden max-w-fit">
+					<button onclick="startMin_Decrement()" type="button" class="px-4 py-2 font-bold text-zinc-600 active:bg-zinc-300 transition-colors" type="button">-</button>
+					<input id="start-min-value" class="w-24 text-center py-2 font-medium bg-zinc-50 text-zinc-800 border-x border-zinc-200" 
+					placeholder="Minuten" 
+					type="text" 
+					inputmode="numeric">
+					<button onclick="startMin_Increment()" type="button" class="px-4 py-2 font-bold text-zinc-600 active:bg-zinc-300 transition-colors" type="button">+</button>
+				</div>
+				<button id="start-btn" onclick="startMin_Start()" class="w-1/3 bg-sky-600 text-white text-lg rounded-xl p-2 disabled:bg-sky-900 disabled:cursor-not-allowed active:bg-sky-900">Starten</button>
+			</div>
+		</div>
+
+		<!-- Today / Temp-Task -->
+		<div class="flex flex-col w-[95%] gap-5 p-3 rounded-xl">
+			<div class="flex flex-col gap-2">
+				<div class="flex flex-row justify-between">
+					<p class="text-2xl font-medium">Heute</p>
+					<div class="flex flex-row items-center gap-3">
+						<img onclick="reloadTodaysTasks()" class="h-5" src="./assets/arrow-rotate-left.svg" type="svg">
+						<button onclick="BTN_showAddTaskDialog(TaskDialogType.ADD, TaskDialogOption.TEMPORARY, -1)" class="flex flex-row items-center gap-2 bg-green-600 rounded-xl p-2 active:bg-green-900">
+							<object class="h-4 fill-white" data="./assets/plus.svg" type="image/svg+xml"></object>
+							<p class="text-lg text-white">Hinzufügen</p>
+						</button>
+					</div>
+				</div>
+				<hr>
+				<!-- Empty
+				-->
+				<div id="temp-tasks-empty" class="bg-white rounded-xl w-full p-3">
+					<p class="text-zinc-600">Leer</p>
+				</div>
+				<div id="temp-tasks-container" class="flex flex-col gap-2">
+					<!-- Task
+					<div class="bg-white border-solid border-2 border-zinc-100 w-full p-3 rounded-xl flex flex-row items-center justify-around gap-1">
+						<div class="flex flex-col">
+							<div>
+								<label class="inline-flex items-center cursor-pointer">
+								<input type="checkbox" value="" class="sr-only peer">
+								<div class="relative w-9 h-5 bg-zinc-400 peer-focus:outline-none peer-focus:ring-4 
+									peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full 
+									rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px] 
+									after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+								</label>
+							</div>
+								<div class="flex flex-row gap-1">
+								<p class="text-large font-bold">10:00</p>
+								<p>bis</p>
+								<p class="text-large font-bold">10:15</p>
+							</div>
+						</div>
+						<div class="flex flex-row gap-7 items-center justify-end w-1/2">
+							<object class="h-6" data="./assets/edit.svg" type=""></object>
+							<object class="h-6" data="./assets/trash-can.svg" type=""></object>
+						</div>
+					</div>
+					-->
+				</div>
+			</div>
+		</div>
+
+		<!-- Add Task / Filter -->
+		<div class="w-[95%] p-3 flex flex-col gap-2 items-center">
+			<div class="w-full flex flex-row items-center justify-between">
+			<p class="text-2xl font-medium">Zeitplan</p>
+			<button onclick="BTN_showAddTaskDialog(TaskDialogType.ADD, TaskDialogOption.STANDARD, -1)" class="flex flex-row items-center gap-2 bg-green-600 rounded-xl p-2 active:bg-green-900">
+				<object class="h-4 fill-white" data="./assets/plus.svg" type="image/svg+xml"></object>
+				<p class="text-lg text-white">Hinzufügen</p>
+			</button>
+			</div>
+			<hr class="w-full">
+			<!-- Filter per Day -->
+			<label class="bg-white w-full flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+				<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="-1"/>
+				<span class="text-sm">Alle</span>
+			</label>
+			<div class="w-full grid grid-cols-7 gap-2 overflow-scroll">
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="0"/>
+					<span class="text-sm">Mo</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="1"/>
+					<span class="text-sm">Di</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="2"/>
+					<span class="text-sm">Mi</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="3"/>
+					<span class="text-sm">Do</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="4"/>
+					<span class="text-sm">Fr</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="5"/>
+					<span class="text-sm">Sa</span>
+				</label>
+				<label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+					<input onclick="readFilter()" type="checkbox" class="filter-checkbox sr-only" value="6"/>
+					<span class="text-sm">So</span>
+				</label>
+			</div>
+		
+			<!-- Weekday Tasks -->
+			<div id="week-schedule-container" class="bg-white flex flex-col w-[95%] gap-5 p-3 rounded-xl mt-5">
+				<!-- Single Day -->
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Montag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Dienstag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Mittwoch</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Donnerstag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Freitag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Samstag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+				<div class="week-day-container flex flex-col gap-2">
+					<p class="text-2xl font-medium mb-1">Sonntag</p>
+					<!-- Task -->
+					<div class="week-day flex flex-col gap-2">
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+	   
+	<!-- Pop-Up's 
+	-->
+	<!-- Add new Task
+	-->
+	<div id="popup-bg" onclick="if (event.target === this) BTN_popupHideBG()" class="hidden bg-zinc-400/75 w-screen h-screen fixed top-0 left-0 z-20 flex flex-col justify-end items-center ">
+		<div id="popup-new-task" class="bg-white p-5 rounded-t-xl flex flex-col gap-5 w-full max-w-[48rem]">
+			<p id="popup-header" class="text-2xl font-medium">...</p>
+			<hr>
+			<div id="popup-weekdays">
+				<p class="text-zinc-600 mb-2">Wochentage:</p>
+				<div class="w-full grid grid-cols-7 gap-2 overflow-scroll">
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="1" type="checkbox" class="sr-only" />
+						<span>Mo</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="2" type="checkbox" class="sr-only" />
+						<span>Di</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="3" type="checkbox" class="sr-only" />
+						<span>Mi</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="4" type="checkbox" class="sr-only" />
+						<span>Do</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="5" type="checkbox" class="sr-only" />
+						<span>Fr</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="6" type="checkbox" class="sr-only" />
+						<span>Sa</span>
+					</label>
+					<label class="flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-green-600 has-[:checked]:bg-green-50 transition-all">
+						<input name="popup-day-select" value="7" type="checkbox" class="sr-only" />
+						<span>So</span>
+					</label>
+				</div>
+			</div>
+			<div class="flex flex-row justify-around gap-3 w-full">
+				<div class="flex flex-col justify-start w-1/2">
+					<p class="text-lg text-zinc-600">Anfang:</p>
+					<input id="popup-time-start" class="w-full border-2 border-zinc-100 rounded-xl p-2" type="time">
+				</div>
+				<div class="flex flex-col justify-start w-1/2">
+					<p class="text-lg text-zinc-600">Ende:</p>
+					<input id="popup-time-end" class="w-full border-2 border-zinc-100 rounded-xl p-2" type="time">
+				</div>
+			</div>
+			<div class="flex flex-row w-full justify-around gap-3 h-12">
+				<button onclick="BTN_popupHideBG()" class="text-white font-bold w-1/2 bg-red-600 rounded-xl p-2">Abbrechen</button>
+				<button onclick="BTN_popupFinish()" class="text-white font-bold w-1/2 bg-green-600 rounded-xl p-2">Fertig</button>
+			</div>
+		</div>
+	</div>
+
+
+    <!-- Templates -->
+	<!-- Task -->
+	<template id="template-task">
+		<div class="bg-white border-solid border-2 border-zinc-100 w-full p-3 rounded-xl flex flex-row items-center justify-around gap-1">
+			<div class="flex flex-col">
+				<!-- Toggle -->
+				<div>
+					<label class="inline-flex items-center cursor-pointer">
+					<input type="checkbox" value="" class="task-toggle sr-only peer">
+					<div class="relative w-9 h-5 bg-zinc-400 peer-focus:outline-none peer-focus:ring-4
+						peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full
+						rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px]
+						after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+					</label>
+				</div>
+				<!-- Time -->
+				<div class="flex flex-row gap-1">
+				<p class="task-time-start text-large font-bold">--:--</p>
+				<p>bis</p>
+				<p class="task-time-end text-large font-bold">--:--</p>
+				</div>
+			</div>
+			<div class="flex flex-row gap-7 items-center justify-end w-1/2">
+				<!-- Edit / Delete -->
+				<img class="task-edit h-6" src="./assets/edit.svg" type="svg">
+				<img class="task-delete h-6" src="./assets/trash-can.svg" type="svg">
+			</div>
+		</div>
+	</template>
+</body>
+</html>
