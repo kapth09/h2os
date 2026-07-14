@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.kaptheo</groupId>
     <artifactId>watering</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <licenses>
-        <license></license>
+        <license />
     </licenses>
-    <developers></developers>
+    <developers />
 
     <properties>
         <java.version>25</java.version>
@@ -68,7 +67,7 @@
         <connection>scm:git:git://github.com/kapth09/h2os.git</connection>
         <developerConnection>scm:git:ssh://github.com/kapth09/h2os.git</developerConnection>
         <url>https://github.com/kapth09/h2os</url>
-        <tag>HEAD</tag>
+        <tag>v0.0.1</tag>
     </scm>
 
 </project>
