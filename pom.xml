@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.kapth09</groupId>
     <artifactId>h2os</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <licenses>
         <license />
@@ -67,7 +67,7 @@
         <connection>scm:git:git://github.com/kapth09/h2os.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/kapth09/h2os.git</developerConnection>
         <url>https://github.com/kapth09/h2os</url>
-        <tag>v0.0.1</tag>
+        <tag>v0.0.1-SNAPSHOT</tag>
     </scm>
 
 </project>
