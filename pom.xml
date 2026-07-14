@@ -8,8 +8,8 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.kapth09</groupId>
-    <artifactId>watering</artifactId>
-    <version>0.0.1</version>
+    <artifactId>h2os</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <licenses>
         <license />
@@ -65,9 +65,9 @@
 
     <scm>
         <connection>scm:git:git://github.com/kapth09/h2os.git</connection>
-        <developerConnection>scm:git:ssh://github.com/kapth09/h2os.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/kapth09/h2os.git</developerConnection>
         <url>https://github.com/kapth09/h2os</url>
-        <tag>v0.0.1</tag>
+        <tag>0.0.1-SNAPSHOT</tag>
     </scm>
 
 </project>
