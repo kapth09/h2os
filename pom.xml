@@ -8,7 +8,7 @@
         <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.kaptheo</groupId>
+    <groupId>com.kapth09</groupId>
     <artifactId>watering</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
