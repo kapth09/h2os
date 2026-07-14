@@ -68,18 +68,18 @@ Flash the ESP via the Arduino-IDE
 1. Build the Image, run in the project root directory
 
    ```bash
-   docker build . --tag watering-image
+   docker build . --tag h2os-image
    ```
 
 2. Run the image, with your timezone, for example: `-e TZ=America/New_York`
 
    ```bash
-   docker run -e TZ=<your timezone> -p 8080:8080 -p 8282:8282 --volume watering-logs:/app/logs --name watering-container watering-image
+   docker run -e TZ=<your timezone> -p 8080:8080 -p 8282:8282 --volume h2os-logs:/app/logs --name h2os-container h2os-image
    ```
 
 #### Server, otherwise
 
-Make sure you have the `openjdk-25-jdk` installed
+Download the `.jar` file from the release page and make sure you have the `openjdk-25-jdk` installed
 
 1. Create the logging directory
 
@@ -87,10 +87,16 @@ Make sure you have the `openjdk-25-jdk` installed
    mkdir logs
    ```
 
-2. Run the Server program
+2. Create the `schedule.data` file
+    
+    ```bash
+    touch schedule.data
+    ```
+
+3. Run the Server program
 
    ```bash
-   java -jar ./watering-x.x.x.jar
+   java -jar ./h2os-x.x.x.jar
    ```
 
 #### Done!
