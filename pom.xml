@@ -53,7 +53,22 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.1.1</version> <configuration>
+                <tagNameFormat>v@{project.version}</tagNameFormat>
+                <autoVersionSubmodules>true</autoVersionSubmodules>
+            </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:git://github.com/kapth09/h2os.git</connection>
+        <developerConnection>scm:git:ssh://github.com/kapth09/h2os.git</developerConnection>
+        <url>https://github.com/kapth09/h2os</url>
+        <tag>HEAD</tag>
+    </scm>
 
 </project>
