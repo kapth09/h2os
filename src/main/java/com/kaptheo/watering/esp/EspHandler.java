@@ -1,7 +1,9 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.esp;
 
+import com.kaptheo.watering.Logger;
+import com.kaptheo.watering.NtfyMessenger;
+import com.kaptheo.watering.tasks.TaskHandler;
 import jdk.net.ExtendedSocketOptions;
-import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.net.StandardSocketOptions;

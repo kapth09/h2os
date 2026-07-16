@@ -1,8 +1,14 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.tasks;
 
+import com.kaptheo.watering.*;
 import com.kaptheo.watering.esp.ESP_MsgTypes;
 import com.kaptheo.watering.esp.EspHandler;
 import com.kaptheo.watering.esp.EspState;
+import com.kaptheo.watering.websocket.MsgResponse;
+import com.kaptheo.watering.websocket.Sendable;
+import com.kaptheo.watering.websocket.WebMsgType;
+import com.kaptheo.watering.websocket.WebSocketHandler;
+import org.apache.juli.logging.Log;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -109,13 +115,33 @@ public class TaskHandler {
     @SuppressWarnings("unchecked")
     private void readTasksFromFile() {
         synchronized (this) {
+            File scheduleFile = new File(FILEPATH);
+            if (!scheduleFile.exists()) {
+                System.out.println(Logger.info("Schedule file doesn't exist"));
+                try {
+                    if (scheduleFile.createNewFile()) {
+                        System.out.println(Logger.info("Successfully created new schedule file"));
+                    } else {
+                        System.out.println(Logger.error("Failed to create schedule file"));
+                    }
+                } catch (IOException e) {
+                    System.out.println(Logger.error("Failed to create schedule file"));
+                    System.out.println(Logger.error(e.getStackTrace(), 10, e.toString()));
+                }
+                return;
+            }
+            if (scheduleFile.length() == 0) {
+                System.out.println(Logger.info("Schedule file is empty"));
+                schedule = null;
+                return;
+            }
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILEPATH))) {
                 schedule = (CopyOnWriteArrayList<Task>) ois.readObject();
                 cleanSchedule(true);
                 copyIntoTodaysSchedule();
                 refresh();
             } catch (IOException | ClassNotFoundException e) {
-                System.out.println(Logger.error(e.getStackTrace(), 10, "Schedule not found"));
+                System.out.println(Logger.error(e.getStackTrace(), 10, e.toString()));
             }
         }
     }
@@ -197,7 +223,7 @@ public class TaskHandler {
                     break;
                 }
             }
-            if (isToday == false) {
+            if (!isToday) {
                 int taskDiff = -1;
                 for (int i = 0; i < schedule.size(); i++) {
                     Task t = schedule.get(i);
@@ -292,7 +318,7 @@ public class TaskHandler {
                 if (daySeconds >= taskEndSeconds) {
                     stopWatering();
                 }
-            } else if (status == TaskStatus.READY && isNextWeek == false){
+            } else if (status == TaskStatus.READY && !isNextWeek){
                 if (nowTimeStamp >= activeTask.getStartTimeStamp() && nowTimeStamp < activeTask.getEndTimeStamp()) {
                     endSecond = now.getSecond();
                     startWatering();

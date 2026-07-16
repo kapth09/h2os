@@ -1,5 +1,6 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.websocket;
 
+import com.kaptheo.watering.Logger;
 import com.kaptheo.watering.esp.EspState;
 import com.kaptheo.watering.tasks.Task;
 import com.kaptheo.watering.tasks.TaskHandler;

@@ -1,4 +1,4 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.websocket;
 
 public interface Sendable {
     int optionIndex();

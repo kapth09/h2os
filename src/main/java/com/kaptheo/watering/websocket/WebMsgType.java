@@ -1,4 +1,4 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.websocket;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

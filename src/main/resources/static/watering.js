@@ -1,5 +1,7 @@
 import { MsgType, MsgCommand, MsgEvent, MsgRequest, TaskStatus, TaskType, Weekdays, TaskDialogType, TaskDialogOption, SERVER_URL, WEBSOCKET_PORT } from "./exports.js";
 
+console.log("CHANGE")
+
 window.sendScheduleChanges = sendScheduleChanges;
 window.startMin_Decrement = startMin_Decrement;
 window.startMin_Increment = startMin_Increment; 
@@ -614,6 +616,7 @@ function padDigits(num, digits) {
 }
 
 // --- WebSocket -- \\
+console.log(SERVER_URL);
 const WEBSOCKET_URL = `ws://${SERVER_URL}:${WEBSOCKET_PORT}/ws`;
 
 let websocket;

@@ -1,4 +1,4 @@
-package com.kaptheo.watering;
+package com.kaptheo.watering.tasks;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
