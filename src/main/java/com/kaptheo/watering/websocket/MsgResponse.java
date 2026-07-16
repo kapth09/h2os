@@ -1,5 +1,7 @@
 package com.kaptheo.watering;
 
+import com.kaptheo.watering.tasks.Task;
+
 public record MsgResponse<T>(WebMsgType type, int option, T data) {
     public record REQ_GET_TASKS(Task[] tasks)                   implements Sendable {
         @Override

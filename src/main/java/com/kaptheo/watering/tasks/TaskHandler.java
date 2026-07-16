@@ -1,5 +1,8 @@
 package com.kaptheo.watering;
 
+import com.kaptheo.watering.esp.ESP_MsgTypes;
+import com.kaptheo.watering.esp.EspHandler;
+import com.kaptheo.watering.esp.EspState;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +16,7 @@ public class TaskHandler {
     private int taskIndex;
     private int endSecond;
     private boolean isNextWeek;
-    private final String FILEPATH = "./schedule.data";
+    private String FILEPATH = "./volume/schedule.data";
     private List<Task> schedule;
     private List<Task> todaysSchedule;
     private Map<EspState, Sendable> espEvents;
@@ -98,7 +101,7 @@ public class TaskHandler {
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILEPATH))) {
                 oos.writeObject(schedule);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(Logger.error(e.getMessage()));
             }
         }
     }
@@ -112,7 +115,7 @@ public class TaskHandler {
                 copyIntoTodaysSchedule();
                 refresh();
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                System.out.println(Logger.error(e.getStackTrace(), 10, "Schedule not found"));
             }
         }
     }
