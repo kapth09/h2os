@@ -23,26 +23,28 @@ Minimum requirements for the project:
 
 ### 2. Configure
 
-1. Update the header file for the ESP32 (`./esp/esp.h`)
+1. Copy the `./esp/esp.template.h` file as `./esp/esp.h` 
+
+    Then change the header file for the ESP32 (`./esp/esp.h`)
 
     ```c
     #define WIFI_SSID "wifi-ssid"
     #define WIFI_PASSWD "wifi-password"
     #define WIFI_HOSTNAME "esp32-watering"
-
+    
     // #define USE_SENSOR 			 	// Uncomment if you want to use the sensor
-
+    
     #define NTP_SERVER "ntp-server" 	// for example: europe.pool.ntp.org
     #define TIMEZONE_INFO "timezone" 	// for example: CET-1CEST,M3.5.0,M10.5.0/3
-
+    
     #define PUMP_PIN 25					// change if necessary
     #define SENSOR_PIN 16				// change if necessary
-
+    
     #define SERVER_IP "server-ip"
     ```
 
-2. Update the `application.properties` for the Spring server (`src/main/resources/application.properties`
-   If you don't use `ntfy`, you can leave it as is
+2. Copy the `src/main/resources/application.template.properties` file as `src/main/resources/application.properties`
+   Then change the `application.properties` for the Spring server, if you don't use `ntfy`, you can leave it as is
 
     ```properties
     ntfy.url="ntfy-pve"		
@@ -81,7 +83,9 @@ Flash the ESP via the Arduino-IDE
 
 #### Server, via Docker-Compose (recommended)
 
-Simply build the image and start the container with `docker compose`
+Change the `TZ=<...>` field in the `./docker-compose.yml` file to match your timezone 
+
+Then build the image and start the container with `docker compose`
 
 ```bash
 docker compose up -d

@@ -8,13 +8,15 @@ services:
       context: .
       dockerfile: ./Dockerfile
 
+    environment:
+      - TZ=<your-timezone>  # e.g America/New_York
+
     ports:
       - "8080:8080"
       - "8282:8282"
 
     volumes:
       - h2os-volume:/app
-      - /etc/localtime:/etc/localtime:ro
 
 volumes:
   h2os-volume:
