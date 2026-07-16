@@ -17,45 +17,61 @@ Minimum requirements for the project:
 
 ### 1. Clone the repo
 
-```bash
-git clone ...
-```
+   ```bash
+   git clone ...
+   ```
 
 ### 2. Configure
 
 1. Update the header file for the ESP32 (`./esp/esp.h`)
 
-```c
-#define WIFI_SSID "wifi-ssid"
-#define WIFI_PASSWD "wifi-password"
-#define WIFI_HOSTNAME "esp32-watering"
+    ```c
+    #define WIFI_SSID "wifi-ssid"
+    #define WIFI_PASSWD "wifi-password"
+    #define WIFI_HOSTNAME "esp32-watering"
 
-// #define USE_SENSOR 			 	// Uncomment if you want to use the sensor
+    // #define USE_SENSOR 			 	// Uncomment if you want to use the sensor
 
-#define NTP_SERVER "ntp-server" 	// for example: europe.pool.ntp.org
-#define TIMEZONE_INFO "timezone" 	// for example: CET-1CEST,M3.5.0,M10.5.0/3
+    #define NTP_SERVER "ntp-server" 	// for example: europe.pool.ntp.org
+    #define TIMEZONE_INFO "timezone" 	// for example: CET-1CEST,M3.5.0,M10.5.0/3
 
-#define PUMP_PIN 25					// change if necessary
-#define SENSOR_PIN 16				// change if necessary
+    #define PUMP_PIN 25					// change if necessary
+    #define SENSOR_PIN 16				// change if necessary
 
-#define SERVER_IP "server-ip"
-```
+    #define SERVER_IP "server-ip"
+    ```
 
 2. Update the `application.properties` for the Spring server (`src/main/resources/application.properties`
    If you don't use `ntfy`, you can leave it as is
 
-```properties
-ntfy.url="ntfy-pve"		
-ntfy.topic="watering"
-```
+    ```properties
+    ntfy.url="ntfy-pve"		
+    ntfy.topic="watering"
+    ```
 
 3. Finally update the server URL for the website (`src/main/resources/static/exports.js`)
 
-```js
-const SERVER_URL = "server-ip";
+    ```js
+    const SERVER_URL = "server-ip";
+    ```
+
+### 3. Compile changes
+
+Compile changes into a `.jar` file
+
+On Linux
+
+```bash
+./mvnw clean compile package
 ```
 
-### 3. Flash & Run
+On Windows
+
+```bash
+./mvnw.cmd clean compile package
+```
+
+### 4. Flash & Run
 
 #### Flash the ESP32
 
@@ -63,34 +79,38 @@ Flash the ESP via the Arduino-IDE
 
 > You may have to install the ESP-Board library, and the `ESP32Time.h` library
 
-#### Server, via Docker (recommended)
+#### Server, via Docker-Compose (recommended)
 
-1. Build the Image, run in the project root directory
+Simply build the image and start the container with `docker compose`
 
-   ```bash
-   docker build . --tag h2os-image
-   ```
+```bash
+docker compose up -d
+```
 
-2. Run the image, with your timezone, for example: `-e TZ=America/New_York`
+Check status with `docker compose logs`
 
-   ```bash
-   docker run -e TZ=<your timezone> -p 8080:8080 -p 8282:8282 --volume h2os-logs:/app/logs --name h2os-container h2os-image
-   ```
+```bash
+docker compose logs
+```
+
+Stop with `docker compose stop`
+
+```bash
+docker compose stop
+```
 
 #### Server, otherwise
-
-Download the `.jar` file from the release page and make sure you have the `openjdk-25-jdk` installed
 
 1. Create the logging directory
 
    ```bash
-   mkdir logs
+   mkdir -p ./volume/logs
    ```
 
 2. Create the `schedule.data` file
-    
+   
     ```bash
-    touch schedule.data
+    touch ./volume/schedule.data
     ```
 
 3. Run the Server program
