@@ -1,0 +1,20 @@
+services:
+  server:
+    image: h2os-image
+    container_name: h2os-container
+    hostname: h2os
+
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+
+    ports:
+      - "8080:8080"
+      - "8282:8282"
+
+    volumes:
+      - h2os-volume:/app
+      - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  h2os-volume:

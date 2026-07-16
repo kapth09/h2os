@@ -2,9 +2,9 @@ FROM eclipse-temurin:25
 
 WORKDIR /app
 
-RUN mkdir logs
+RUN mkdir -p ./volume/logs
 
-COPY ./target/h2os-*.*.*.jar ./application.jar
+COPY ./target/h2os-*.*.*-SNAPSHOT.jar ./application.jar
 
 EXPOSE 8080
 
