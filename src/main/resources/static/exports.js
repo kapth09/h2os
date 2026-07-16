@@ -1,6 +1,6 @@
 export { SERVER_URL, WEBSOCKET_PORT, MsgType, MsgCommand, MsgEvent, MsgRequest, TaskStatus, TaskType, Weekdays, TaskDialogType, TaskDialogOption };
 
-const SERVER_URL = "192.168.0.199";
+const SERVER_URL = "server-ip";
 const WEBSOCKET_PORT = 8080;
 
 const Weekdays = new Map([
