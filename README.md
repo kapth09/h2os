@@ -25,6 +25,10 @@ Minimum requirements for the project:
 
 1. Copy the `./esp/esp.template.h` file as `./esp/esp.h` 
 
+    ```bash
+    cp ./esp/esp.template.h ./esp/esp.h
+    ```
+
     Then change the header file for the ESP32 (`./esp/esp.h`)
 
     ```c
@@ -44,6 +48,11 @@ Minimum requirements for the project:
     ```
 
 2. Copy the `src/main/resources/application.template.properties` file as `src/main/resources/application.properties`
+
+   ```bash
+   cp src/main/resources/application.template.properties src/main/resources/application.properties
+   ```
+
    Then change the `application.properties` for the Spring server, if you don't use `ntfy`, you can leave it as is
 
     ```properties
