@@ -8,7 +8,6 @@ import com.kaptheo.watering.websocket.MsgResponse;
 import com.kaptheo.watering.websocket.Sendable;
 import com.kaptheo.watering.websocket.WebMsgType;
 import com.kaptheo.watering.websocket.WebSocketHandler;
-import org.apache.juli.logging.Log;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -95,10 +94,10 @@ public class TaskHandler {
     private void cleanSchedule(boolean restart) {
         synchronized (this) {
             int day = LocalDateTime.now().getDayOfWeek().getValue();
-	    schedule.removeIf(t -> t.type() == TaskType.INSERTED || (t.type() == TaskType.TEMPORARY && t.day() != day));
-	    if (restart) {
-		schedule.replaceAll(t -> t.status() == TaskStatus.FINISHED ? t.withStatus(TaskStatus.READY) : t);
-	    }
+            schedule.removeIf(t -> t.type() == TaskType.INSERTED || (t.type() == TaskType.TEMPORARY && t.day() != day));
+            if (restart) {
+                schedule.replaceAll(t -> t.status() == TaskStatus.FINISHED ? t.withStatus(TaskStatus.READY) : t);
+            }
         }
     }
 
@@ -132,13 +131,14 @@ public class TaskHandler {
             }
             if (scheduleFile.length() == 0) {
                 System.out.println(Logger.info("Schedule file is empty"));
-                schedule = null;
+                schedule = new CopyOnWriteArrayList<>();
                 return;
             }
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILEPATH))) {
                 schedule = (CopyOnWriteArrayList<Task>) ois.readObject();
                 cleanSchedule(true);
                 copyIntoTodaysSchedule();
+                System.out.println(Logger.info("Read existing schedule data"));
                 refresh();
             } catch (IOException | ClassNotFoundException e) {
                 System.out.println(Logger.error(e.getStackTrace(), 10, e.toString()));
@@ -259,13 +259,17 @@ public class TaskHandler {
     public void startWatering() {
         synchronized (this) {
             if (activeTask == null) return;
-            activeTask = activeTask.withStatus(TaskStatus.RUNNING);
-            espHandler.writeEsp(ESP_MsgTypes.MSG_START);
+            int res = espHandler.writeEsp(ESP_MsgTypes.MSG_START);
+            if (res != -1) {
+                activeTask = activeTask.withStatus(TaskStatus.RUNNING);
+            }
         }
     }
     public void stopWatering() {
         synchronized (this) {
             if (activeTask == null) return;
+            int res = espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
+            if  (res == -1) return;
             if (activeTask.type() == TaskType.INSERTED) {
                 todaysSchedule.remove(activeTask);
             } else if (activeTask.type() == TaskType.TEMPORARY) {
@@ -275,7 +279,6 @@ public class TaskHandler {
             }
             endSecond = 0;
             refresh();
-            espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
         }
     }
     public void resumeWatering() {
@@ -313,14 +316,18 @@ public class TaskHandler {
             int nowTimeStamp = (now.getHour() << 8) | now.getMinute();
             TaskStatus status = activeTask.status();
             if (status == TaskStatus.RUNNING || status == TaskStatus.PAUSED) {
-		int taskEndSeconds = (activeTask.endHour() * 3600) + (activeTask.endMinute() * 60) + endSecond;
-		int daySeconds = now.toLocalTime().toSecondOfDay();
+                int taskEndSeconds = (activeTask.endHour() * 3600) + (activeTask.endMinute() * 60) + endSecond;
+                int daySeconds = now.toLocalTime().toSecondOfDay();
                 if (daySeconds >= taskEndSeconds) {
                     stopWatering();
                 }
             } else if (status == TaskStatus.READY && !isNextWeek){
                 if (nowTimeStamp >= activeTask.getStartTimeStamp() && nowTimeStamp < activeTask.getEndTimeStamp()) {
-                    endSecond = now.getSecond();
+                    if (activeTask.type() == TaskType.INSERTED) {
+                        endSecond = now.getSecond();
+                    } else {
+                        endSecond = 0;
+                    }
                     startWatering();
                 }
             }

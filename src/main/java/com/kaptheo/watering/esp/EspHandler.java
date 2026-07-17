@@ -94,7 +94,7 @@ public class EspHandler {
 						int data = tcpMessage.get(0);
 						ESP_MsgTypes msgType = ESP_MsgTypes.fromInt(data);
 						handleTcpMsg(msgType);
-						System.out.println(Logger.info("Message %s read (%d Bytes)", msgType, bytesRead));
+						// System.out.println(Logger.info("Message %s read (%d Bytes)", msgType, bytesRead));
 					} catch (IOException e) {
 						key.cancel();
 						channel.close();
@@ -109,12 +109,15 @@ public class EspHandler {
 	public int writeEsp(ESP_MsgTypes msgType) {
         try {
 			SocketChannel esp = espSocket;
-			if (esp == null) return -1;
+			if (esp == null) {
+				System.out.println(Logger.warning("Can't send message: ESP not connected"));
+				return -1;
+			}
 			tcpMessage.clear();
 			tcpMessage.put((byte) msgType.ordinal());
 			tcpMessage.flip();
             int bytesWritten = esp.write(tcpMessage);
-			System.out.println(Logger.info("Message %s(%d) written (%d Bytes)", msgType.name(), msgType.ordinal(), bytesWritten));
+			System.out.println(Logger.info("Message %s(%d) sent (%d Bytes)", msgType.name(), msgType.ordinal(), bytesWritten));
 			espChecker.setExpectedResponse(msgType);
 			return bytesWritten;
         } catch (IOException e) {
@@ -130,15 +133,14 @@ public class EspHandler {
 			return;
 		}
 		espChecker.reset();
+		System.out.println(Logger.info("Got message %s(%d)", msgType.name(), msgType.ordinal()));
 		switch (msgType) {
 			case MSG_STARTED -> {
 				isWatering = true;
-				System.out.println(Logger.info("ESP started"));
 				taskHandler.espStarted();
 			}
 			case MSG_STOPPED -> {
 				isWatering = false;
-				System.out.println(Logger.info("ESP stopped"));
 				taskHandler.espStopped();
 			}
 			case MSG_LEAK_DETECTED -> {

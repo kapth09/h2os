@@ -20,3 +20,4 @@ services:
 
 volumes:
   h2os-volume:
+    name: h2os-volume
