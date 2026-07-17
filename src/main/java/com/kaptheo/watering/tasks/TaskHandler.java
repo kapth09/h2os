@@ -284,17 +284,19 @@ public class TaskHandler {
     public void resumeWatering() {
         synchronized (this) {
             if (activeTask == null) return;
+            int res = espHandler.writeEsp(ESP_MsgTypes.MSG_START);
+            if (res == -1) return;
             if (activeTask.status() != TaskStatus.PAUSED) return;
             activeTask = activeTask.withStatus(TaskStatus.RUNNING);
-            espHandler.writeEsp(ESP_MsgTypes.MSG_START);
         }
     }
     public void pauseWatering() {
         synchronized (this) {
             if (activeTask == null) return;
+            int res = espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
+            if (res == -1) return;
             if (activeTask.status() != TaskStatus.RUNNING) return;
             activeTask = activeTask.withStatus(TaskStatus.PAUSED);
-            espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
         }
     }
 
