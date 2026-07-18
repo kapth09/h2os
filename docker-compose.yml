@@ -16,7 +16,7 @@ services:
       - "8282:8282"
 
     volumes:
-      - h2os-volume:/app
+      - h2os-volume:/app/volume
 
 volumes:
   h2os-volume:
