@@ -116,21 +116,21 @@ public class TaskHandler {
         synchronized (this) {
             File scheduleFile = new File(FILEPATH);
             if (!scheduleFile.exists()) {
-                System.out.println(Logger.info("Schedule file doesn't exist"));
+                System.out.println(Logger.info("File %s doesn't exist", FILEPATH));
                 try {
                     if (scheduleFile.createNewFile()) {
-                        System.out.println(Logger.info("Successfully created new schedule file"));
+                        System.out.println(Logger.info("Successfully created file %s", FILEPATH));
                     } else {
-                        System.out.println(Logger.error("Failed to create schedule file"));
+                        System.out.println(Logger.error("Failed to create file %s", FILEPATH));
                     }
                 } catch (IOException e) {
-                    System.out.println(Logger.error("Failed to create schedule file"));
-                    System.out.println(Logger.error(e.getStackTrace(), 10, e.toString()));
+                    System.out.println(Logger.error("Failed to create file %s", FILEPATH));
+                    System.out.println(Logger.error(e, 10, e.toString()));
                 }
                 return;
             }
             if (scheduleFile.length() == 0) {
-                System.out.println(Logger.info("Schedule file is empty"));
+                System.out.println(Logger.info("File %s is empty", FILEPATH));
                 schedule = new CopyOnWriteArrayList<>();
                 return;
             }
@@ -138,10 +138,10 @@ public class TaskHandler {
                 schedule = (CopyOnWriteArrayList<Task>) ois.readObject();
                 cleanSchedule(true);
                 copyIntoTodaysSchedule();
-                System.out.println(Logger.info("Read existing schedule data"));
+                System.out.println(Logger.info("Read existing file %s", FILEPATH));
                 refresh();
             } catch (IOException | ClassNotFoundException e) {
-                System.out.println(Logger.error(e.getStackTrace(), 10, e.toString()));
+                System.out.println(Logger.error(e, 10, e.toString()));
             }
         }
     }

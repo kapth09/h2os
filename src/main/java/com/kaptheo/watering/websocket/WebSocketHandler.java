@@ -110,8 +110,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     public<T> void broadcastMessage(WebMsgType type, Sendable option, T data) {
+        System.out.println(Logger.info("Starting broadcast of message %s: %s", type.name(), option.optionIndex()));
         for (WebSocketSession session : sessions) {
             send(session, type, option, data);
         }
+        System.out.println(Logger.info("Finished broadcast of message %s: %s", type.name(), option.optionIndex()));
     }
 }
