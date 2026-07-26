@@ -37,8 +37,13 @@
 		<!-- Banner -->
 		<header class="bg-white p-3 w-full h-fit flex flex-col items-center gap-5 mb-6 rounded-xl">
 			<div class="flex justify-between items-center w-full">
-				<h1 class="text-3xl font-medium">Bewässerung</h1>
-				<button id="status-save" onclick="sendScheduleChanges()" class="hidden z-20 fixed top-3 right-3 bg-sky-600 text-white text-lg p-2 rounded-xl font-medium w-1/3 shadow-md">Speicher</button>
+				<div class="flex flex-col gap-2">
+					<h1 class="text-3xl font-medium">Bewässerung</h1>
+					<a href="logs.html" class="bg-gray-100 rounded-md p-3 w-fit">
+						<img class="h-5 z-10 opacity-75" src="./assets/magnifying-glass-chart.svg" alt="Logs" />
+					</a>
+				</div>
+				<button id="status-save" onclick="sendScheduleChanges()" class="hidden z-20 bg-sky-600 text-white text-lg p-2 rounded-xl font-medium w-1/3 shadow-md">Speichern</button>
 			</div> 
 			<!-- Connection Status -->
 			<div class="flex flex-row items-center justify-center gap-2 w-full">

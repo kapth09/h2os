@@ -9,7 +9,7 @@ services:
       dockerfile: ./Dockerfile
 
     environment:
-      - TZ=<your-timezone>  # e.g America/New_York
+      - TZ=${TZ}  # e.g America/New_York
 
     ports:
       - "8080:8080"

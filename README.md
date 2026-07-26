@@ -92,7 +92,7 @@ Flash the ESP via the Arduino-IDE
 
 #### Server, via Docker-Compose (recommended)
 
-Change the `TZ=<...>` field in the `./docker-compose.yml` file to match your timezone 
+Change the `TZ=<...>` field in the `./env` file to match your timezone 
 
 Then build the image and start the container with `docker compose`
 

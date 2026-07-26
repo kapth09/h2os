@@ -1,6 +1,6 @@
 package com.kaptheo.watering.esp;
 
-import com.kaptheo.watering.Logger;
+import com.kaptheo.watering.logs.Logger;
 import com.kaptheo.watering.NtfyMessenger;
 import com.kaptheo.watering.tasks.TaskHandler;
 import jdk.net.ExtendedSocketOptions;

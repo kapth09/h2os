@@ -1,6 +1,6 @@
 package com.kaptheo.watering.esp;
 
-import com.kaptheo.watering.Logger;
+import com.kaptheo.watering.logs.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.io.IOException;

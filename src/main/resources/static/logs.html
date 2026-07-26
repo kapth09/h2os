@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Bewässerung - Logs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="assets/h2os-favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter Tight"', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        #log-app:has(#filter-info:checked) .log-row:not(.log-info) { display: none; }
+        #log-app:has(#filter-warning:checked) .log-row:not(.log-warning) { display: none; }
+        #log-app:has(#filter-error:checked) .log-row:not(.log-error) { display: none; }
+    </style>
+    <script src="logs.js" defer></script>
+</head>
+<body class="w-screen min-h-screen flex justify-center bg-zinc-100 font-sans text-zinc-800">
+<div id="log-app" class="flex flex-col items-center gap-3 max-w-[48rem] w-full min-h-full p-3 sm:p-5">
+
+    <header class="bg-white p-3 w-full h-fit flex flex-row items-center justify-between rounded-xl shadow-xs">
+        <div class="flex flex-row items-center gap-3">
+            <a href="index.html" class="p-2.5 rounded-xl hover:bg-zinc-200 active:bg-zinc-300 transition-colors flex items-center justify-center" aria-label="Zurück">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-black" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-medium">Logs</h1>
+        </div>
+    </header>
+
+    <div class="w-[95%] sm:w-full flex flex-col gap-2 p-3 bg-white rounded-xl shadow-xs">
+        <div class="flex flex-row justify-between items-center">
+            <p class="text-2xl font-medium">Filter</p>
+        </div>
+        <hr class="border-zinc-200">
+
+        <!-- 4 Filter Buttons matching day selection pills from index.html -->
+        <div class="w-full grid grid-cols-4 gap-2">
+            <label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-sky-600 has-[:checked]:bg-sky-50 transition-all">
+                <input type="radio" id="filter-all" name="log-level-filter" class="sr-only" checked />
+                <span class="text-xs sm:text-sm font-medium">All</span>
+            </label>
+
+            <label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50 transition-all">
+                <input type="radio" id="filter-info" name="log-level-filter" class="sr-only" />
+                <span class="text-xs sm:text-sm font-medium text-sky-700 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 inline-block"></span>
+                        Info
+                    </span>
+            </label>
+
+            <label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 transition-all">
+                <input type="radio" id="filter-warning" name="log-level-filter" class="sr-only" />
+                <span class="text-xs sm:text-sm font-medium text-amber-700 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                        Warning
+                    </span>
+            </label>
+
+            <label class="bg-white flex items-center justify-center p-2 border-2 border-zinc-100 rounded-md cursor-pointer select-none has-[:checked]:border-red-500 has-[:checked]:bg-red-50 transition-all">
+                <input type="radio" id="filter-error" name="log-level-filter" class="sr-only" />
+                <span class="text-xs sm:text-sm font-medium text-red-700 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                        Error
+                    </span>
+            </label>
+        </div>
+    </div>
+
+    <div class="bg-white sm:p-2 w-full sm:w-full rounded-xl flex flex-col gap-3 shadow-xs">
+        <!-- Table Header -->
+        <div class="grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-2.5 rounded-lg text-xs font-semibold text-zinc-700 uppercase tracking-wider">
+            <div>Time</div>
+            <div>Message</div>
+        </div>
+
+        <!-- Table Body -->
+        <div id="log-table-body" class="flex flex-col gap-1 w-full">
+
+                <div class="log-row log-info grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-sky-50/50 border-l-4 border-l-sky-500 items-start border border-sky-100">
+                    <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
+                        <p class="log-time">xx:yy:yy</p>
+                    </div>
+                    <div class="text-sm sm:text-base text-sky-800 font-medium break-words leading-snug">
+                        <p class="log-text">template info</p>
+                    </div>
+                </div>
+
+            <!-- Log Entry: WARNING -->
+                <div class="log-row log-warning grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-amber-50/60 border-l-4 border-l-amber-400 items-start border border-amber-100">
+                    <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
+                        <p class="log-time">xx:yy:zz</p>
+                    </div>
+                    <div class="text-sm sm:text-base text-amber-800 font-medium break-words leading-snug">
+                        <p class="log-text">template warning</p>
+                    </div>
+                </div>
+
+            <!-- Log Entry: ERROR -->
+                <div class="log-row log-error grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-red-50/60 border-l-4 border-l-red-500 items-start border border-red-100">
+                    <div class="text-xs sm:text-sm text-red-500 font-mono font-medium mt-0.5">
+                        <p class="log-time">xx:yy:zz</p>
+                    </div>
+                    <div class="text-sm sm:text-base text-red-800 font-bold break-words leading-snug">
+                        <p class="log-text">template error</p>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Log Entry: INFO -->
+<template id="template-info">
+    <div class="log-row log-info grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-sky-50/50 border-l-4 border-l-sky-500 items-start border border-sky-100">
+        <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
+            <p class="log-time">xx:yy:yy</p>
+        </div>
+        <div class="text-sm sm:text-base text-sky-800 font-medium break-words leading-snug">
+            <p class="log-text">template info</p>
+        </div>
+    </div>
+</template>
+
+<!-- Log Entry: WARNING -->
+<template id="template-warning">
+    <div class="log-row log-warning grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-amber-50/60 border-l-4 border-l-amber-400 items-start border border-amber-100">
+        <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
+            <p class="log-time">xx:yy:zz</p>
+        </div>
+        <div class="text-sm sm:text-base text-amber-800 font-medium break-words leading-snug">
+            <p class="log-text">template warning</p>
+        </div>
+    </div>
+</template>
+
+<!-- Log Entry: ERROR -->
+<template id="template-error">
+    <div class="log-row log-error grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-red-50/60 border-l-4 border-l-red-500 items-start border border-red-100">
+        <div class="text-xs sm:text-sm text-zinc-500 font-mono font-medium mt-0.5">
+            <p class="log-time">xx:yy:zz</p>
+        </div>
+        <div class="text-sm sm:text-base text-red-800 font-medium break-words leading-snug">
+            <p class="log-text">template error</p>
+        </div>
+    </div>
+</template>
+
+</body>
+</html>
