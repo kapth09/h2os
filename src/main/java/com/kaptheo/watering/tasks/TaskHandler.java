@@ -336,8 +336,9 @@ public class TaskHandler {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * SUN")
+    @Scheduled(cron = "0 0 0 * * MON")
     protected void restartSchedule() {
+        Logger.info("Reseting schedule");
         isNextWeek = false;
         cleanSchedule(true);
         refresh();

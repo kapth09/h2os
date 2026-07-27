@@ -2,6 +2,7 @@ package com.kaptheo.watering.logs;
 
 import com.kaptheo.watering.Server;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+@Component
 public class Logger {
     private static final String ANSI_COLOR_RED      = "\033[31m";
     private static final String ANSI_COLOR_GREEN    = "\033[32m";
@@ -100,6 +102,7 @@ public class Logger {
     private static void setupLogName() {
         String logName = LOGS_ROOT_DIR + LOG_DIR + LocalDate.now() + ".log";
         LOG_PATH = Paths.get(logName);
+        Logger.infoStdoutOnly("Created new log file");
     }
 
     private static boolean createDirectory(String dirName) {

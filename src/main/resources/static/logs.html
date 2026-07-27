@@ -44,7 +44,7 @@
         </div>
     </header>
 
-    <div class="w-[95%] sm:w-full flex flex-col gap-2 p-3 bg-white rounded-xl shadow-xs">
+    <div class="w-full sm:w-full flex flex-col gap-2 p-3 bg-white rounded-xl shadow-xs">
         <div class="flex flex-row justify-between items-center">
             <p class="text-2xl font-medium">Filter</p>
         </div>
@@ -91,7 +91,7 @@
         </div>
 
         <!-- Table Body -->
-        <div id="log-table-body" class="flex flex-col gap-1 w-full">
+        <div id="log-table-body" class="flex flex-col gap-1 w-full p-2">
 
                 <div class="log-row log-info grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-sky-50/50 border-l-4 border-l-sky-500 items-start border border-sky-100">
                     <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
@@ -128,7 +128,7 @@
 
 <!-- Log Entry: INFO -->
 <template id="template-info">
-    <div class="log-row log-info grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-sky-50/50 border-l-4 border-l-sky-500 items-start border border-sky-100">
+    <div class="log-row log-info grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-md bg-sky-50/50 border-l-4 border-l-sky-500 items-start border border-sky-100">
         <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
             <p class="log-time">xx:yy:yy</p>
         </div>
@@ -140,7 +140,7 @@
 
 <!-- Log Entry: WARNING -->
 <template id="template-warning">
-    <div class="log-row log-warning grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-amber-50/60 border-l-4 border-l-amber-400 items-start border border-amber-100">
+    <div class="log-row log-warning grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-md bg-amber-50/60 border-l-4 border-l-amber-400 items-start border border-amber-100">
         <div class="text-xs sm:text-sm text-zinc-500 font-mono mt-0.5">
             <p class="log-time">xx:yy:zz</p>
         </div>
@@ -152,7 +152,7 @@
 
 <!-- Log Entry: ERROR -->
 <template id="template-error">
-    <div class="log-row log-error grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-sm bg-red-50/60 border-l-4 border-l-red-500 items-start border border-red-100">
+    <div class="log-row log-error grid grid-cols-[4.5rem_1fr] sm:grid-cols-[5.5rem_1fr] gap-3 p-3 rounded-md bg-red-50/60 border-l-4 border-l-red-500 items-start border border-red-100">
         <div class="text-xs sm:text-sm text-zinc-500 font-mono font-medium mt-0.5">
             <p class="log-time">xx:yy:zz</p>
         </div>
