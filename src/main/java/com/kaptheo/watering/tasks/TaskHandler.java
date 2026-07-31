@@ -8,6 +8,7 @@ import com.kaptheo.watering.websocket.MsgResponse;
 import com.kaptheo.watering.websocket.Sendable;
 import com.kaptheo.watering.websocket.WebMsgType;
 import com.kaptheo.watering.websocket.WebSocketHandler;
+import org.apache.juli.logging.Log;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -175,12 +176,14 @@ public class TaskHandler {
     }
 
     public void espStarted() {
+        System.out.println(Logger.info("ESP started watering"));
         espEvents.put(EspState.WATERING_STATUS, new MsgResponse.EVT_STARTED(activeTask, endSecond));
         MsgResponse.EVT_STARTED option = new MsgResponse.EVT_STARTED(activeTask, endSecond);
         webSocketHandler.broadcastMessage(WebMsgType.EVENT, option, option);
     }
 
     public void espStopped() {
+        System.out.println(Logger.info("ESP stopped watering"));
         espEvents.put(EspState.WATERING_STATUS, new MsgResponse.EVT_STOPPED(activeTask, endSecond));
         MsgResponse.EVT_STOPPED option = new MsgResponse.EVT_STOPPED(activeTask, endSecond);
         webSocketHandler.broadcastMessage(WebMsgType.EVENT, option, option);
@@ -338,7 +341,7 @@ public class TaskHandler {
 
     @Scheduled(cron = "0 0 0 * * MON")
     protected void restartSchedule() {
-        Logger.info("Reseting schedule");
+        System.out.println(Logger.info("Resetting schedule"));
         isNextWeek = false;
         cleanSchedule(true);
         refresh();
@@ -346,6 +349,7 @@ public class TaskHandler {
 
     @Scheduled(cron = "0 0 0 * * *")
     protected void cleanTodaysTasks() {
+        System.out.println(Logger.info("Resetting todays tasks"));
         copyIntoTodaysSchedule();
     }
 }

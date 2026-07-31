@@ -94,7 +94,7 @@ public class EspHandler {
 						int data = tcpMessage.get(0);
 						ESP_MsgTypes msgType = ESP_MsgTypes.fromInt(data);
 						handleTcpMsg(msgType);
-						// System.out.println(Logger.info("Message %s read (%d Bytes)", msgType, bytesRead));
+						System.out.println(Logger.debug("Message %s read (%d Bytes)", msgType, bytesRead));
 					} catch (IOException e) {
 						key.cancel();
 						channel.close();
@@ -117,7 +117,7 @@ public class EspHandler {
 			tcpMessage.put((byte) msgType.ordinal());
 			tcpMessage.flip();
             int bytesWritten = esp.write(tcpMessage);
-			System.out.println(Logger.info("Message %s(%d) sent (%d Bytes)", msgType.name(), msgType.ordinal(), bytesWritten));
+			System.out.println(Logger.debug("Message %s(%d) sent (%d Bytes)", msgType.name(), msgType.ordinal(), bytesWritten));
 			espChecker.setExpectedResponse(msgType);
 			return bytesWritten;
         } catch (IOException e) {
@@ -133,7 +133,7 @@ public class EspHandler {
 			return;
 		}
 		espChecker.reset();
-		System.out.println(Logger.info("Got message %s(%d)", msgType.name(), msgType.ordinal()));
+		System.out.println(Logger.debug("Got message %s(%d)", msgType.name(), msgType.ordinal()));
 		switch (msgType) {
 			case MSG_STARTED -> {
 				isWatering = true;
@@ -198,10 +198,7 @@ public class EspHandler {
 		public boolean deadlineReached() {
 			if (expectedRes == null) return false;
 			long timeSince = System.currentTimeMillis();
-			if (timeSince > expectedResDeadline) {
-				return true;
-			}
-			return false;
-		}
+            return timeSince > expectedResDeadline;
+        }
 	}
 }
