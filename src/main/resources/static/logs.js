@@ -47,8 +47,7 @@ async function hitAPI(logUrl) {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    const data = await response.text();
-    return data;
+    return await response.text();
   } catch (error) {
     console.error('Fetch error:', error);
   }
@@ -146,5 +145,7 @@ fetchLog(LOG_ENDPOINT_CURRENT);
 
 hitAPI(LOG_ENDPOINT_LIST).then(logText => {
     logFiles = JSON.parse(logText);
+    logFiles.sort();
+    logFiles.reverse();
     setLogFileSelection();
 })

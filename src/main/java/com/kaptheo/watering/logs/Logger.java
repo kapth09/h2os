@@ -117,7 +117,7 @@ public class Logger {
         long nowMillis = System.currentTimeMillis();
         for (File log : logFiles) {
             long lastModified = log.lastModified();
-            if (nowMillis - lastModified > MILLIS_PER_WEEK) {
+            if ((nowMillis - lastModified) >= MILLIS_PER_WEEK) {
                 boolean deleted = log.delete();
                 if (!deleted) {
                     System.out.println(Logger.errorStdoutOnly("Failed to delete log %s", log.getName()));
