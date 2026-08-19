@@ -12,7 +12,7 @@ public enum MsgCommand {
     RESUME_TASK         (5),
     RELOAD_TODAYS_TASKS (6);
 
-    private int value;
+    private final int value;
 
     MsgCommand(int v) {this.value = v;}
 

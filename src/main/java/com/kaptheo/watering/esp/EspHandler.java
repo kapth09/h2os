@@ -22,14 +22,16 @@ public class EspHandler {
 	private boolean isWatering;
 	private Selector selector;
 	private ServerSocketChannel servSockChannel;
-	private ByteBuffer tcpMessage;
 	private SocketChannel espSocket;
 	private TaskHandler taskHandler;
-	private EspChecker espChecker;
+	private final ByteBuffer tcpMessage;
+	private final EspChecker espChecker;
 
 	@Value("${ntfy.url}")
 	private String NTFY_URL;
-	private NtfyMessenger ntfyMessenger;
+	@Value("${ntfy.watering.baseTitle}")
+	private String NTFY_BASE_TITLE;
+	private final NtfyMessenger ntfyMessenger;
 
 	public EspHandler() {
 		this.tcpMessage = ByteBuffer.allocate(4);
@@ -89,12 +91,11 @@ public class EspHandler {
 					SocketChannel channel = (SocketChannel) key.channel();
 					try {
 						tcpMessage.clear();
-						int bytesRead = channel.read(tcpMessage);
+						channel.read(tcpMessage);
 						tcpMessage.flip();
 						int data = tcpMessage.get(0);
 						ESP_MsgTypes msgType = ESP_MsgTypes.fromInt(data);
 						handleTcpMsg(msgType);
-						System.out.println(Logger.debug("Message %s read (%d Bytes)", msgType, bytesRead));
 					} catch (IOException e) {
 						key.cancel();
 						channel.close();
@@ -133,7 +134,7 @@ public class EspHandler {
 			return;
 		}
 		espChecker.reset();
-		System.out.println(Logger.debug("Got message %s(%d)", msgType.name(), msgType.ordinal()));
+		System.out.println(Logger.debug("Got ESP message %s(%d)", msgType.name(), msgType.ordinal()));
 		switch (msgType) {
 			case MSG_STARTED -> {
 				isWatering = true;
@@ -145,15 +146,13 @@ public class EspHandler {
 			}
 			case MSG_LEAK_DETECTED -> {
 				System.out.println(Logger.warning("Water leak detected"));
-				ntfyMessenger.send("Wassersensor", "Wasser ist eingedrungen");
+				ntfyMessenger.send(NTFY_BASE_TITLE, "Wassersensor", "Wasser ist eingedrungen");
 			}
 			case MSG_LEAK_RESOLVED -> {
 				System.out.println(Logger.info("Water leak resolved"));
-				ntfyMessenger.send("Wassersensor", "Eingedrungenes Wasser wurde beseitigt");
+				ntfyMessenger.send(NTFY_BASE_TITLE, "Wassersensor", "Eingedrungenes Wasser wurde beseitigt");
 			}
-			default -> {
-				System.out.println(Logger.error("Unknown TCP message %d", msgType.ordinal()));
-			}
+			default -> System.out.println(Logger.error("Unknown TCP message %d", msgType.ordinal()));
 		}
 	}
 
@@ -161,11 +160,10 @@ public class EspHandler {
 		return isWatering;
 	}
 
-	private class EspChecker {
+	private static class EspChecker {
 		private ESP_MsgTypes expectedRes;
 		private long expectedResDeadline;
-		private long expectedResDuration;
-		private boolean responseResolved = false;
+		private final long expectedResDuration;
 
 		public EspChecker(long expectedResDuration) {
 			this.expectedResDuration = expectedResDuration;
@@ -182,7 +180,6 @@ public class EspHandler {
 				expectedRes = ESP_MsgTypes.MSG_STOPPED;
 			}
 			this.expectedResDeadline = System.currentTimeMillis() + this.expectedResDuration;
-			this.responseResolved = false;
 		}
 
 		public boolean isExpected(ESP_MsgTypes msg) {
@@ -192,7 +189,6 @@ public class EspHandler {
 
 		public void reset() {
 			this.expectedRes = null;
-			this.responseResolved = true;
 		}
 
 		public boolean deadlineReached() {
