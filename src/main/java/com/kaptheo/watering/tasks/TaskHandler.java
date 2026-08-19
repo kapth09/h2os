@@ -21,13 +21,13 @@ public class TaskHandler {
     private int taskIndex;
     private int endSecond;
     private boolean isNextWeek;
-    private String FILEPATH = "./volume/schedule.data";
-    private List<Task> schedule;
-    private List<Task> todaysSchedule;
-    private Map<EspState, Sendable> espEvents;
     private Task activeTask;
-    private EspHandler espHandler;
-    private WebSocketHandler webSocketHandler;
+    private List<Task> schedule;
+    private final List<Task> todaysSchedule;
+    private final Map<EspState, Sendable> espEvents;
+    private final EspHandler espHandler;
+    private final WebSocketHandler webSocketHandler;
+    private final String FILEPATH = "./volume/schedule.data";
 
     public TaskHandler(EspHandler espHandler, WebSocketHandler webSocketHandler) {
         this.espHandler = espHandler;
@@ -47,7 +47,6 @@ public class TaskHandler {
 
     public void setSchedule(Task[] newTasks) {
         synchronized (this) {
-            espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
             schedule.clear();
             Collections.addAll(schedule, newTasks);
             Collections.sort(schedule);
@@ -59,7 +58,6 @@ public class TaskHandler {
 
     public void setTodaysSchedule(Task[] newTasks) {
         synchronized (this) {
-            espHandler.writeEsp(ESP_MsgTypes.MSG_STOP);
             todaysSchedule.clear();
             Collections.addAll(todaysSchedule, newTasks);
             Collections.sort(todaysSchedule);
@@ -91,13 +89,11 @@ public class TaskHandler {
         }
     }
 
-    private void cleanSchedule(boolean restart) {
+    private void cleanSchedule() {
         synchronized (this) {
             int day = LocalDateTime.now().getDayOfWeek().getValue();
             schedule.removeIf(t -> t.type() == TaskType.INSERTED || (t.type() == TaskType.TEMPORARY && t.day() != day));
-            if (restart) {
-                schedule.replaceAll(t -> t.status() == TaskStatus.FINISHED ? t.withStatus(TaskStatus.READY) : t);
-            }
+            schedule.replaceAll(t -> t.status() == TaskStatus.FINISHED ? t.withStatus(TaskStatus.READY) : t);
         }
     }
 
@@ -136,7 +132,7 @@ public class TaskHandler {
             }
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILEPATH))) {
                 schedule = (CopyOnWriteArrayList<Task>) ois.readObject();
-                cleanSchedule(true);
+                cleanSchedule();
                 copyIntoTodaysSchedule();
                 System.out.println(Logger.info("Read existing file %s", FILEPATH));
                 refresh();
@@ -175,15 +171,18 @@ public class TaskHandler {
     }
 
     public void espStarted() {
+        System.out.println(Logger.info("ESP started watering"));
         espEvents.put(EspState.WATERING_STATUS, new MsgResponse.EVT_STARTED(activeTask, endSecond));
         MsgResponse.EVT_STARTED option = new MsgResponse.EVT_STARTED(activeTask, endSecond);
         webSocketHandler.broadcastMessage(WebMsgType.EVENT, option, option);
     }
 
     public void espStopped() {
+        System.out.println(Logger.info("ESP stopped watering"));
         espEvents.put(EspState.WATERING_STATUS, new MsgResponse.EVT_STOPPED(activeTask, endSecond));
         MsgResponse.EVT_STOPPED option = new MsgResponse.EVT_STOPPED(activeTask, endSecond);
         webSocketHandler.broadcastMessage(WebMsgType.EVENT, option, option);
+        refresh();
     }
 
     public void startNow(int duration) {
@@ -206,6 +205,7 @@ public class TaskHandler {
 
     private void refresh() {
         synchronized (this) {
+            if (espHandler.isWatering()) return;
             LocalDateTime now = LocalDateTime.now();
             taskIndex = now.getDayOfWeek().getValue();
             activeTask = null;
@@ -278,7 +278,6 @@ public class TaskHandler {
                 schedule.set(taskIndex, activeTask.withStatus(TaskStatus.FINISHED));
             }
             endSecond = 0;
-            refresh();
         }
     }
     public void resumeWatering() {
@@ -338,14 +337,15 @@ public class TaskHandler {
 
     @Scheduled(cron = "0 0 0 * * MON")
     protected void restartSchedule() {
-        Logger.info("Reseting schedule");
+        System.out.println(Logger.info("Resetting schedule"));
         isNextWeek = false;
-        cleanSchedule(true);
+        cleanSchedule();
         refresh();
     }
 
     @Scheduled(cron = "0 0 0 * * *")
     protected void cleanTodaysTasks() {
+        System.out.println(Logger.info("Resetting todays tasks"));
         copyIntoTodaysSchedule();
     }
 }

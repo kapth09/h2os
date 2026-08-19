@@ -4,6 +4,7 @@ import com.kaptheo.watering.Server;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,12 +27,15 @@ public class Logger {
     private static final String INFO    = "INFO";
     private static final String WARNING = "WARNING";
     private static final String ERROR   = "ERROR";
+    private static final String DEBUG   = "DEBUG";
 
     private static final String LOGS_ROOT_DIR = "./volume/logs/";
     private static String LOG_DIR;
     private static Path LOG_PATH;
 
     private static boolean finishedInitialisation = false;
+    private static final long MILLIS_PER_DAY = 60 * 60 * 24 * 1000;
+    private static final long MILLIS_PER_WEEK = MILLIS_PER_DAY * 7;
 
     private static String formatText(String COLOR, String TEXT, boolean writeToFile, String msg, Object... args) {
         String time = LocalTime.now().truncatedTo(ChronoUnit.SECONDS).toString();
@@ -77,6 +81,9 @@ public class Logger {
     public static String error(Exception exception, int printCount, String msg, Object... args) { return formatException(ANSI_COLOR_RED, ERROR, exception, printCount, true, msg, args); }
     public static String errorStdoutOnly(Exception exception, int printCount, String msg, Object... args) { return formatException(ANSI_COLOR_RED, ERROR, exception, printCount, false, msg, args); }
 
+    public static String debug(String msg, Object... args) { return formatText(ANSI_COLOR_GREEN, DEBUG, true, msg, args); }
+    public static String debugStdoutOnly(String msg, Object... args) { return formatText(ANSI_COLOR_GREEN, DEBUG, false, msg, args); }
+
     private static void writeLogToFile(String msg) {
         if (!finishedInitialisation) {
             initialise();
@@ -100,9 +107,26 @@ public class Logger {
 
     @Scheduled(cron = "0 0 0 * * *")
     private static void setupLogName() {
+        // Delete files last modified 7 days ago
+        File logDir = new File(getFullLogDir());
+        File[] logFiles = logDir.listFiles();
+        if (logFiles == null) {
+            System.out.println(Logger.errorStdoutOnly("Failed to list logs in directory"));
+            return;
+        }
+        long nowMillis = System.currentTimeMillis();
+        for (File log : logFiles) {
+            long lastModified = log.lastModified();
+            if ((nowMillis - lastModified) >= MILLIS_PER_WEEK) {
+                boolean deleted = log.delete();
+                if (!deleted) {
+                    System.out.println(Logger.errorStdoutOnly("Failed to delete log %s", log.getName()));
+                }
+            }
+        }
         String logName = LOGS_ROOT_DIR + LOG_DIR + LocalDate.now() + ".log";
         LOG_PATH = Paths.get(logName);
-        Logger.infoStdoutOnly("Created new log file");
+        System.out.println(Logger.infoStdoutOnly("Created new log file"));
     }
 
     private static boolean createDirectory(String dirName) {

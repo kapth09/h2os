@@ -13,9 +13,8 @@ import java.time.Duration;
 public class NtfyMessenger {
     @Value("${ntfy.topic}")
     private String TOPIC;
-    private String uri;
-    private final String BASE_TITLE = "Bewaesserung";
-    private HttpClient httpClient;
+    private final String uri;
+    private final HttpClient httpClient;
 
     public NtfyMessenger(String address) {
         this.uri = "http://" + address + "/" + TOPIC;
@@ -24,8 +23,8 @@ public class NtfyMessenger {
                 .build();
     }
 
-    public HttpResponse<String> send(String titleExpansion, String body) {
-        String fullTitle = BASE_TITLE + ": " + titleExpansion;
+    public void send(String baseTitle, String titleExpansion, String body) {
+        String fullTitle = baseTitle + ": " + titleExpansion;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .header("Title", fullTitle)
@@ -33,11 +32,10 @@ public class NtfyMessenger {
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
         try {
-            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            System.out.print(Logger.error("Failed to send message via ntfy: %s: %s", titleExpansion, body));
+            System.out.print(Logger.error("Sending message via ntfy %s: %s, because %s", titleExpansion, body, e.getMessage()));
             e.printStackTrace();
         }
-        return null;
     }
 }

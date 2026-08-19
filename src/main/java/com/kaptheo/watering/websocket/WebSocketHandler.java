@@ -4,6 +4,7 @@ import com.kaptheo.watering.logs.Logger;
 import com.kaptheo.watering.esp.EspState;
 import com.kaptheo.watering.tasks.Task;
 import com.kaptheo.watering.tasks.TaskHandler;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,14 +16,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
-    private CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private TaskHandler taskHandler;
+    private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void setTaskManager(TaskHandler taskHandler) {this.taskHandler = taskHandler;}
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) {
         sessions.add(session);
         for (EspState state : EspState.values()) {
             Sendable msg = taskHandler.getEspState(state);
@@ -31,12 +32,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
         sessions.remove(session);
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage msg) {
+    protected void handleTextMessage(@NonNull WebSocketSession session, TextMessage msg) {
         String payload = msg.getPayload();
         MsgResponse request =  objectMapper.readValue(payload, MsgResponse.class);
         switch (request.type()) {
@@ -64,6 +65,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
     private void handleCommands(MsgCommand option, String data) {
         if (option == null) return;
+        System.out.println(Logger.debug("WebSocket cmd %s ", option.name()));
         switch (option) {
             case SET_TASKS -> {
                 if (data.isBlank() || data.equals("null")) return;
@@ -80,21 +82,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 MsgResponse.CMD_START_NOW cmd = objectMapper.readValue(data, MsgResponse.CMD_START_NOW.class);
                 taskHandler.startNow(cmd.duration());
             }
-            case STOP_NOW -> {
-                taskHandler.stopWatering();
-            }
-            case PAUSE_TASK -> {
-                taskHandler.pauseWatering();
-            }
-            case RESUME_TASK -> {
-                taskHandler.resumeWatering();
-            }
-            case RELOAD_TODAYS_TASKS -> {
-                taskHandler.reloadTodaysTasks();
-            }
-            default -> {
-                System.out.println(Logger.error("Invalid CMD message: %s", option.name()));
-            }
+            case STOP_NOW -> taskHandler.stopWatering();
+            case PAUSE_TASK -> taskHandler.pauseWatering();
+            case RESUME_TASK -> taskHandler.resumeWatering();
+            case RELOAD_TODAYS_TASKS -> taskHandler.reloadTodaysTasks();
+            default -> System.out.println(Logger.error("Invalid CMD message: %s", option.name()));
         }
     }
 
@@ -102,7 +94,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         MsgResponse response = new MsgResponse(type, option.optionIndex(), data);
         String responseStr = objectMapper.writeValueAsString(response);
         try {
-            //System.out.println("Send " + responseStr);
             session.sendMessage(new TextMessage((responseStr)));
         } catch (IOException e) {
             System.out.println(Logger.error("Failed to send WebSocket message"));
@@ -110,10 +101,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     public<T> void broadcastMessage(WebMsgType type, Sendable option, T data) {
-        System.out.println(Logger.info("Starting broadcast of message %s: %s", type.name(), option.optionIndex()));
         for (WebSocketSession session : sessions) {
             send(session, type, option, data);
         }
-        System.out.println(Logger.info("Finished broadcast of message %s: %s", type.name(), option.optionIndex()));
     }
 }
