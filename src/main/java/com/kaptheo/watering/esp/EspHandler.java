@@ -4,7 +4,6 @@ import com.kaptheo.watering.logs.Logger;
 import com.kaptheo.watering.NtfyMessenger;
 import com.kaptheo.watering.tasks.TaskHandler;
 import jdk.net.ExtendedSocketOptions;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.net.StandardSocketOptions;
 import java.util.*;
@@ -27,17 +26,13 @@ public class EspHandler {
 	private final ByteBuffer tcpMessage;
 	private final EspChecker espChecker;
 
-	@Value("${ntfy.url}")
-	private String NTFY_URL;
-	@Value("${ntfy.watering.baseTitle}")
-	private String NTFY_BASE_TITLE;
 	private final NtfyMessenger ntfyMessenger;
 
-	public EspHandler() {
+	public EspHandler(NtfyMessenger ntfyMessenger) {
 		this.tcpMessage = ByteBuffer.allocate(4);
 		this.espSocket = null;
 		this.espChecker = new EspChecker(5000);
-		this.ntfyMessenger = new NtfyMessenger(NTFY_URL);
+		this.ntfyMessenger = ntfyMessenger;
 	}
 
 	public void setTaskHandler(TaskHandler taskHandler) { this.taskHandler = taskHandler; }
@@ -146,11 +141,11 @@ public class EspHandler {
 			}
 			case MSG_LEAK_DETECTED -> {
 				System.out.println(Logger.warning("Water leak detected"));
-				ntfyMessenger.send(NTFY_BASE_TITLE, "Wassersensor", "Wasser ist eingedrungen");
+				ntfyMessenger.send("Wassersensor", "Wasser ist eingedrungen");
 			}
 			case MSG_LEAK_RESOLVED -> {
 				System.out.println(Logger.info("Water leak resolved"));
-				ntfyMessenger.send(NTFY_BASE_TITLE, "Wassersensor", "Eingedrungenes Wasser wurde beseitigt");
+				ntfyMessenger.send("Wassersensor", "Eingedrungenes Wasser wurde beseitigt");
 			}
 			default -> System.out.println(Logger.error("Unknown TCP message %d", msgType.ordinal()));
 		}
